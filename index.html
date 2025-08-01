@@ -892,7 +892,7 @@ function updateNextPrayerCountdown() {
 
   container.innerHTML = `
     <div class="text-center">
-      <div class="text-xs text-gray-500">Next Prayer</div>
+      <span>Next Prayer</span>
       <div class="text-lg font-semibold text-indigo-600">${name}</div>
       <div class="text-sm text-gray-700">${time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
       <div class="text-sm font-mono text-blue-500">-${hours}:${mins}:${secs}</div>
