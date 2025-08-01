@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Prayer App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      let prayerTimes = {}; // global
+      let monthlyCalendar = [];
+      let currentCalendarPage = 0;
+      const calendarPageSize = 7;
+      window.prayerChart = null;
+      
+
+    </script>
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -86,7 +97,7 @@
           >
             <h1 class="text-2xl font-bold mb-2">Assalamu Alaikum</h1>
             <p class="opacity-90">
-              Today is <span id="current-date" class="font-medium"></span>
+              <span id="current-date" class="font-medium"></span>
             </p>
           </div>
 
@@ -100,23 +111,29 @@
           </div>
 
           <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">
-              Quick Actions
-            </h2>
             <div class="grid grid-cols-2 gap-4">
               <button
-                onclick="showScreen('duas-screen')"
                 class="bg-green-100 text-green-800 p-4 rounded-lg flex items-center justify-center flex-col"
               >
-                <i class="fas fa-hands-praying text-2xl mb-2"></i>
-                <span>Duas</span>
+                <div id="next-prayer" class="text-center text-sm"></div>
+
               </button>
               <button
-                onclick="showScreen('tasbih-screen')"
+                onclick="showScreen('prayer-screen')"
                 class="bg-purple-100 text-purple-800 p-4 rounded-lg flex items-center justify-center flex-col"
               >
-                <i class="fas fa-dharmachakra text-2xl mb-2"></i>
-                <span>Tasbih</span>
+                <span>Track Prayer</span>
+
+                <canvas
+                  id="myDonutChart"
+                  width="200"
+                  height="200"
+                  class="mt-2"
+                ></canvas>
+                <div class="flex items-center space-x-2 mt-2">
+                  <span>Checkin</span>
+                  <i class="fa-solid fa-arrow-right text-sm"></i>
+                </div>
               </button>
             </div>
           </div>
@@ -829,6 +846,78 @@
     </div>
 
     <script>
+
+
+        function getNextPrayer(prayerTimes) {
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+
+  const orderedPrayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+  for (let prayer of orderedPrayers) {
+    const timeStr = prayerTimes[prayer];
+    if (!timeStr) continue;
+
+    const [hours, minutes] = timeStr.split(":");
+    const time = new Date(todayStr + "T" + timeStr.padStart(5, "0"));
+
+    if (now < time) {
+      return { name: prayer, time };
+    }
+  }
+
+  // All prayers have passed → fallback to tomorrow’s Fajr
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(...prayerTimes["Fajr"].split(":").map(Number), 0, 0);
+  return { name: "Fajr (Tomorrow)", time: tomorrow };
+}
+
+function updateNextPrayerCountdown() {
+  const container = document.getElementById("next-prayer");
+  if (!container || !prayerTimes) return;
+
+  const { name, time } = getNextPrayer(prayerTimes);
+  const now = new Date();
+  const diff = time - now;
+
+  if (diff <= 0) {
+    container.innerHTML = `<div class="text-center text-sm">Loading...</div>`;
+    return;
+  }
+
+  const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, "0");
+  const mins = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, "0");
+  const secs = String(Math.floor((diff / 1000) % 60)).padStart(2, "0");
+
+  container.innerHTML = `
+    <div class="text-center">
+      <div class="text-xs text-gray-500">Next Prayer</div>
+      <div class="text-lg font-semibold text-indigo-600">${name}</div>
+      <div class="text-sm text-gray-700">${time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+      <div class="text-sm font-mono text-blue-500">-${hours}:${mins}:${secs}</div>
+    </div>
+  `;
+}
+
+      const centerTextPlugin = {
+        id: "centerText",
+        beforeDraw(chart) {
+          const { width, height, ctx } = chart;
+          const text = "1/5";
+
+          ctx.save();
+          ctx.font = "bold 18px sans-serif";
+          ctx.fillStyle = "#1F2937"; // Tailwind gray-800
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(text, width / 2, height / 2);
+          ctx.restore();
+        },
+      };
+
+      
+
       // Sample data for duas
       const duas = [
         {
@@ -929,82 +1018,72 @@
         },
       ];
 
-      // Sample prayer times
-      const prayerTimes = {
-        Fajr: "5:30 AM",
-        Sunrise: "6:45 AM",
-        Dhuhr: "12:30 PM",
-        Asr: "3:45 PM",
-        Maghrib: "6:20 PM",
-        Isha: "8:00 PM",
-      };
+      async function fetchTodayPrayerTimes() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
 
-      // Sample monthly calendar data
-      const monthlyCalendar = [
-        {
-          date: "1",
-          day: "Mon",
-          fajr: "5:30",
-          dhuhr: "12:30",
-          asr: "3:45",
-          maghrib: "6:20",
-          isha: "8:00",
-        },
-        {
-          date: "2",
-          day: "Tue",
-          fajr: "5:29",
-          dhuhr: "12:30",
-          asr: "3:45",
-          maghrib: "6:21",
-          isha: "8:01",
-        },
-        {
-          date: "3",
-          day: "Wed",
-          fajr: "5:28",
-          dhuhr: "12:30",
-          asr: "3:45",
-          maghrib: "6:22",
-          isha: "8:02",
-        },
-        {
-          date: "4",
-          day: "Thu",
-          fajr: "5:27",
-          dhuhr: "12:30",
-          asr: "3:45",
-          maghrib: "6:23",
-          isha: "8:03",
-        },
-        {
-          date: "5",
-          day: "Fri",
-          fajr: "5:26",
-          dhuhr: "12:30",
-          asr: "3:45",
-          maghrib: "6:24",
-          isha: "8:04",
-        },
-        {
-          date: "6",
-          day: "Sat",
-          fajr: "5:25",
-          dhuhr: "12:30",
-          asr: "3:45",
-          maghrib: "6:25",
-          isha: "8:05",
-        },
-        {
-          date: "7",
-          day: "Sun",
-          fajr: "5:24",
-          dhuhr: "12:30",
-          asr: "3:45",
-          maghrib: "6:26",
-          isha: "8:06",
-        },
-      ];
+        const response = await fetch(
+          `https://api.aladhan.com/v1/timingsByCity/${dd}-${mm}-${yyyy}?city=Jakarta&country=Indonesia&method=2`
+        );
+        const data = await response.json();
+
+        const timings = data.data.timings;
+
+        const prayerTimes = {
+          Fajr: timings.Fajr,
+          Sunrise: timings.Sunrise,
+          Dhuhr: timings.Dhuhr,
+          Asr: timings.Asr,
+          Maghrib: timings.Maghrib,
+          Isha: timings.Isha,
+        };
+
+        return prayerTimes;
+      }
+
+      async function fetchMonthlyPrayerCalendar() {
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
+        const response = await fetch(
+          `https://api.aladhan.com/v1/calendarByCity?city=Jakarta&country=Indonesia&method=2&month=${month}&year=${year}`
+        );
+        const data = await response.json();
+
+        const calendarData = data.data;
+
+        const monthlyCalendar = calendarData.map((day) => {
+          const gregorian = day.date.gregorian;
+          const timings = day.timings;
+          return {
+            date: gregorian.day,
+            day: gregorian.weekday.en,
+            fajr: timings.Fajr.split(" ")[0],
+            dhuhr: timings.Dhuhr.split(" ")[0],
+            asr: timings.Asr.split(" ")[0],
+            maghrib: timings.Maghrib.split(" ")[0],
+            isha: timings.Isha.split(" ")[0],
+          };
+        });
+
+        return monthlyCalendar;
+      }
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        prayerTimes = await fetchTodayPrayerTimes(); // no const
+        setInterval(updateNextPrayerCountdown, 1000);
+updateNextPrayerCountdown();
+
+        monthlyCalendar = await fetchMonthlyPrayerCalendar();
+
+        // Now use prayerTimes and monthlyCalendar to render your UI
+        loadPrayerTimes();
+        loadDetailedPrayerTimes();
+        loadPrayerCalendar();
+      });
 
       // Sample tasbih history
       const tasbihHistory = [
@@ -1038,64 +1117,77 @@
       let customDuas = [];
 
       // Initialize the app
-      document.addEventListener("DOMContentLoaded", function () {
-        // Set current date
-        const now = new Date();
-        const options = {
+      document.addEventListener("DOMContentLoaded", async function () {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+
+        // Fetch prayer times and assign to global variables
+        prayerTimes = await fetchTodayPrayerTimes();
+        monthlyCalendar = await fetchMonthlyPrayerCalendar();
+
+        // Set combined Gregorian and Hijri date
+        const gregorianDate = today.toLocaleDateString("en-US", {
           weekday: "long",
           year: "numeric",
           month: "long",
           day: "numeric",
-        };
-        document.getElementById("current-date").textContent =
-          now.toLocaleDateString("en-US", options);
+        });
 
-        // Load prayer times
+        const hijriFormatter = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        const hijriDate = hijriFormatter.format(today);
+
+        document.getElementById(
+          "current-date"
+        ).textContent = `${gregorianDate} / ${hijriDate}`;
+        document.getElementById("prayer-hijri-date").textContent = hijriDate;
+
+        // Load everything
         loadPrayerTimes();
-
-        // Load duas
+        loadDetailedPrayerTimes();
+        loadPrayerCalendar();
         loadDuas();
-
-        // Load custom duas from localStorage
         loadCustomDuas();
-
-        // Load tasbih history
         loadTasbihHistory();
-
-        // Load user profile
         loadUserProfile();
-
-        // Set active tab in bottom nav
         setActiveNav("home");
-
-        // Load user preferences
         loadUserPreferences();
+        updatePrayerDonut(); 
       });
 
       // Show screen function
-      function showScreen(screenId) {
-        // Hide all screens
-        document.querySelectorAll('[id$="-screen"]').forEach((screen) => {
-          screen.classList.add("hidden");
-        });
+// Show screen function
+function showScreen(screenId) {
+  // Hide all screens
+  document.querySelectorAll('[id$="-screen"]').forEach((screen) => {
+    screen.classList.add("hidden");
+  });
 
-        // Show the selected screen
-        document.getElementById(screenId).classList.remove("hidden");
+  // Show the selected screen
+  document.getElementById(screenId).classList.remove("hidden");
 
-        // Update active nav
-        const navId = screenId.split("-")[0];
-        setActiveNav(navId);
+  // Update active nav
+  const navId = screenId.split("-")[0];
+  setActiveNav(navId);
 
-        // Refresh content if needed
-        if (screenId === "prayer-screen") {
-          loadDetailedPrayerTimes();
-          loadPrayerCalendar();
-        } else if (screenId === "duas-screen") {
-          loadDuas();
-        } else if (screenId === "tasbih-screen") {
-          updateCounterDisplay();
-        }
-      }
+  // Refresh content if needed
+  if (screenId === "prayer-screen") {
+    loadDetailedPrayerTimes();
+    loadPrayerCalendar();
+  } else if (screenId === "duas-screen") {
+    loadDuas();
+  } else if (screenId === "tasbih-screen") {
+    updateCounterDisplay();
+  } else if (screenId === "home-screen") {
+    updatePrayerDonut(); 
+  }
+}
 
       // Set active nav
       function setActiveNav(navId) {
@@ -1116,109 +1208,190 @@
       }
 
       // Load prayer times
-      function loadPrayerTimes() {
-        const prayerTimesContainer = document.getElementById("prayer-times");
-        prayerTimesContainer.innerHTML = "";
+function loadPrayerTimes() {
+  const container = document.getElementById("prayer-times");
+  container.innerHTML = "";
 
-        for (const [prayer, time] of Object.entries(prayerTimes)) {
-          const prayerCard = document.createElement("div");
-          prayerCard.className =
-            "bg-white rounded-lg shadow-md p-4 text-center prayer-card";
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+  let activePrayer = null;
 
-          const prayerName = document.createElement("h3");
-          prayerName.className = "font-semibold text-gray-800 mb-1";
-          prayerName.textContent = prayer;
+  const prayers = Object.entries(prayerTimes).map(([name, time]) => {
+    const [hours, minutes] = time.split(":");
+    const prayerTime = new Date(todayStr + "T" + time.padStart(5, "0"));
+    return { name, time, date: prayerTime };
+  });
 
-          const prayerTime = document.createElement("p");
-          prayerTime.className = "text-blue-500 font-bold text-lg";
-          prayerTime.textContent = time;
+  for (let i = prayers.length - 1; i >= 0; i--) {
+    if (now >= prayers[i].date) {
+      activePrayer = prayers[i].name;
+      break;
+    }
+  }
 
-          prayerCard.appendChild(prayerName);
-          prayerCard.appendChild(prayerTime);
-          prayerTimesContainer.appendChild(prayerCard);
-        }
-      }
+  for (const { name, time } of prayers) {
+    const card = document.createElement("div");
+    const isActive = name === activePrayer;
+    card.className = `rounded-lg shadow-md p-4 text-center prayer-card ${
+      isActive ? "bg-blue-100 border border-blue-500" : "bg-white"
+    }`;
+
+    const title = document.createElement("h3");
+    title.className = `font-semibold ${
+      isActive ? "text-blue-700" : "text-gray-800"
+    } mb-1`;
+    title.textContent = name;
+
+    const timeEl = document.createElement("p");
+    timeEl.className = "text-blue-500 font-bold text-lg";
+    timeEl.textContent = time;
+
+    card.appendChild(title);
+    card.appendChild(timeEl);
+    container.appendChild(card);
+  }
+}
 
       // Load detailed prayer times
-      function loadDetailedPrayerTimes() {
-        document.getElementById("prayer-location").textContent = `${
-          userData.location.city
-        }, ${getCountryName(userData.location.country)}`;
+function loadDetailedPrayerTimes() {
+  const container = document.getElementById("detailed-prayer-times");
+  container.innerHTML = "";
 
-        // Set hijri date (simplified)
-        const hijriDate = "15 Dhul-Qa'dah 1444";
-        document.getElementById("prayer-hijri-date").textContent = hijriDate;
+  const todayKey = new Date().toISOString().split("T")[0];
+  const checkedData = JSON.parse(localStorage.getItem("prayerCheckmarks")) || {};
+  const todayChecks = checkedData[todayKey] || [];
 
-        const container = document.getElementById("detailed-prayer-times");
-        container.innerHTML = "";
+  ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].forEach((prayer) => {
+    const prayerItem = document.createElement("div");
+    prayerItem.className = "flex items-center justify-between py-3 border-b border-gray-100";
 
-        for (const [prayer, time] of Object.entries(prayerTimes)) {
-          const prayerItem = document.createElement("div");
-          prayerItem.className =
-            "flex items-center justify-between py-3 border-b border-gray-100";
+    const left = document.createElement("div");
+    left.className = "flex items-center space-x-3";
 
-          const prayerName = document.createElement("span");
-          prayerName.className = "font-medium text-gray-800";
-          prayerName.textContent = prayer;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "form-checkbox h-5 w-5 text-blue-600";
+    checkbox.checked = todayChecks.includes(prayer);
 
-          const prayerTime = document.createElement("span");
-          prayerTime.className = "font-bold text-gray-800";
-          prayerTime.textContent = time;
-
-          prayerItem.appendChild(prayerName);
-          prayerItem.appendChild(prayerTime);
-          container.appendChild(prayerItem);
-        }
+    checkbox.onchange = () => {
+      const updated = new Set(todayChecks);
+      if (checkbox.checked) {
+        updated.add(prayer);
+      } else {
+        updated.delete(prayer);
       }
+      checkedData[todayKey] = [...updated];
+      localStorage.setItem("prayerCheckmarks", JSON.stringify(checkedData));
+      updatePrayerDonut(); // update the chart in home
+    };
+
+    const prayerName = document.createElement("span");
+    prayerName.className = "font-medium text-gray-800";
+    prayerName.textContent = prayer;
+
+    left.appendChild(checkbox);
+    left.appendChild(prayerName);
+
+    const prayerTime = document.createElement("span");
+    prayerTime.className = "font-bold text-gray-800";
+    prayerTime.textContent = prayerTimes[prayer];
+
+    prayerItem.appendChild(left);
+    prayerItem.appendChild(prayerTime);
+    container.appendChild(prayerItem);
+  });
+}
+
+function updatePrayerDonut() {
+  const todayKey = new Date().toISOString().split("T")[0];
+  const checkmarks = JSON.parse(localStorage.getItem("prayerCheckmarks")) || {};
+  const completed = (checkmarks[todayKey] || []).length;
+  const total = 5;
+
+  const ctx = document.getElementById("myDonutChart").getContext("2d");
+  if (window.prayerChart) window.prayerChart.destroy(); // if already rendered
+
+  const centerTextPlugin = {
+    id: 'centerText',
+    beforeDraw(chart) {
+      const { width, height, ctx } = chart;
+      const text = `${completed}/${total}`;
+      ctx.save();
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillStyle = '#1F2937';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, width / 2, height / 2);
+      ctx.restore();
+    }
+  };
+
+  window.prayerChart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Completed", "Remaining"],
+      datasets: [{
+        data: [completed, total - completed],
+        backgroundColor: ["#3B82F6", "#E5E7EB"],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      cutout: "70%",
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      }
+    },
+    plugins: [centerTextPlugin]
+  });
+}
 
       // Load prayer calendar
       function loadPrayerCalendar() {
         const container = document.getElementById("prayer-calendar");
         container.innerHTML = "";
 
-        // Create table
+        if (!monthlyCalendar || monthlyCalendar.length === 0) return;
+
+        const totalPages = Math.ceil(monthlyCalendar.length / calendarPageSize);
+        const start = currentCalendarPage * calendarPageSize;
+        const end = start + calendarPageSize;
+        const pageData = monthlyCalendar.slice(start, end);
+
+        // Table container with fixed height
+        const tableWrapper = document.createElement("div");
+        tableWrapper.className = "overflow-y-auto max-h-[400px]"; // adjust height if needed
+
         const table = document.createElement("table");
         table.className = "w-full";
 
-        // Create header
         const thead = document.createElement("thead");
         const headerRow = document.createElement("tr");
         headerRow.className = "bg-gray-100";
-
-        const headers = [
-          "Date",
-          "Day",
-          "Fajr",
-          "Dhuhr",
-          "Asr",
-          "Maghrib",
-          "Isha",
-        ];
-        headers.forEach((headerText) => {
+        ["Date", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].forEach((h) => {
           const th = document.createElement("th");
           th.className = "py-2 px-1 text-sm font-medium text-gray-700";
-          th.textContent = headerText;
+          th.textContent = h;
           headerRow.appendChild(th);
         });
-
         thead.appendChild(headerRow);
         table.appendChild(thead);
 
-        // Create body
         const tbody = document.createElement("tbody");
-        monthlyCalendar.forEach((day) => {
+        pageData.forEach((day) => {
           const row = document.createElement("tr");
           row.className = "border-b border-gray-100";
 
           const cells = [
-            day.date,
-            day.day,
+            `${day.day}, ${day.date}`,
             day.fajr,
             day.dhuhr,
             day.asr,
             day.maghrib,
             day.isha,
           ];
+
           cells.forEach((cellText, index) => {
             const td = document.createElement("td");
             td.className = `py-2 px-1 text-center text-sm ${
@@ -1232,7 +1405,51 @@
         });
 
         table.appendChild(tbody);
-        container.appendChild(table);
+        tableWrapper.appendChild(table);
+        container.appendChild(tableWrapper);
+
+        // Pagination controls
+        const controls = document.createElement("div");
+        controls.className = "flex justify-center items-center space-x-2 mt-4";
+
+        if (currentCalendarPage > 0) {
+          const prevBtn = document.createElement("button");
+          prevBtn.textContent = "Prev";
+          prevBtn.className = "px-3 py-1 bg-gray-200 rounded";
+          prevBtn.onclick = () => {
+            currentCalendarPage--;
+            loadPrayerCalendar();
+          };
+          controls.appendChild(prevBtn);
+        }
+
+        for (let i = 0; i < totalPages; i++) {
+          const pageBtn = document.createElement("button");
+          pageBtn.textContent = (i + 1).toString();
+          pageBtn.className = `px-3 py-1 rounded ${
+            i === currentCalendarPage
+              ? "bg-blue-500 text-white font-bold"
+              : "bg-gray-200 text-gray-800"
+          }`;
+          pageBtn.onclick = () => {
+            currentCalendarPage = i;
+            loadPrayerCalendar();
+          };
+          controls.appendChild(pageBtn);
+        }
+
+        if (currentCalendarPage < totalPages - 1) {
+          const nextBtn = document.createElement("button");
+          nextBtn.textContent = "Next";
+          nextBtn.className = "px-3 py-1 bg-gray-200 rounded";
+          nextBtn.onclick = () => {
+            currentCalendarPage++;
+            loadPrayerCalendar();
+          };
+          controls.appendChild(nextBtn);
+        }
+
+        container.appendChild(controls);
       }
 
       // Load duas
