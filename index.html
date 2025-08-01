@@ -1,443 +1,1965 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Prayer App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        .active-tab {
-            color: #3b82f6;
-            transform: scale(1.1);
+      .slide-up {
+        animation: slideUp 0.3s ease-out;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
         }
-        .prayer-card {
-            transition: all 0.3s ease;
+        to {
+          transform: translateY(0);
+          opacity: 1;
         }
-        .prayer-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
-        .tasbih-counter {
-            transition: all 0.2s ease;
+        to {
+          opacity: 1;
         }
-        .tasbih-counter:active {
-            transform: scale(0.95);
-        }
-        .dua-card {
-            transition: all 0.3s ease;
-        }
-        .dua-card:hover {
-            transform: translateY(-3px);
-        }
+      }
+
+      .prayer-card {
+        transition: all 0.3s ease;
+      }
+
+      .prayer-card:hover {
+        transform: scale(1.03);
+      }
+
+      .dua-button {
+        transition: all 0.2s ease;
+      }
+
+      .dua-button:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
     </style>
-</head>
-<body class="bg-gray-50 font-sans">
-    <div class="max-w-md mx-auto bg-white min-h-screen flex flex-col">
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto pb-16">
-            <!-- Home Screen (Default) -->
-            <div id="home-screen" class="p-4">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Prayer Times</h1>
-                    <p class="text-gray-600" id="current-date"></p>
-                </div>
-                
-                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg mb-6">
-                    <h2 class="text-xl font-semibold mb-2">Next Prayer</h2>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-3xl font-bold" id="next-prayer-name">Fajr</p>
-                            <p class="text-sm opacity-90" id="next-prayer-time">05:12 AM</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm">Time remaining</p>
-                            <p class="text-2xl font-bold" id="time-remaining">3h 24m</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-white rounded-lg shadow p-4 text-center prayer-card">
-                        <p class="text-gray-500 text-sm">Fajr</p>
-                        <p class="text-xl font-bold" id="fajr-time">05:12 AM</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-4 text-center prayer-card">
-                        <p class="text-gray-500 text-sm">Sunrise</p>
-                        <p class="text-xl font-bold" id="sunrise-time">06:30 AM</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-4 text-center prayer-card">
-                        <p class="text-gray-500 text-sm">Dhuhr</p>
-                        <p class="text-xl font-bold" id="dhuhr-time">12:30 PM</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-4 text-center prayer-card">
-                        <p class="text-gray-500 text-sm">Asr</p>
-                        <p class="text-xl font-bold" id="asr-time">03:45 PM</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-4 text-center prayer-card">
-                        <p class="text-gray-500 text-sm">Maghrib</p>
-                        <p class="text-xl font-bold" id="maghrib-time">06:15 PM</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-4 text-center prayer-card">
-                        <p class="text-gray-500 text-sm">Isha</p>
-                        <p class="text-xl font-bold" id="isha-time">08:00 PM</p>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-4 mb-6">
-                    <h3 class="font-semibold text-gray-800 mb-2">Today's Verse</h3>
-                    <p class="text-gray-700 italic mb-2">"And establish prayer and give zakah and bow with those who bow [in worship and obedience]."</p>
-                    <p class="text-right text-gray-600">- Quran 2:43</p>
-                </div>
+  </head>
+  <body class="bg-gray-50 font-sans">
+    <div
+      class="max-w-md mx-auto bg-cover bg-center bg-[url('https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/bg_fajr.jpg')] min-h-screen flex flex-col relative"
+    >
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto pb-20">
+        <!-- Home Screen -->
+        <div id="home-screen" class="p-4">
+          <div
+            class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg mb-6"
+          >
+            <h1 class="text-2xl font-bold mb-2">Assalamu Alaikum</h1>
+            <p class="opacity-90">
+              Today is <span id="current-date" class="font-medium"></span>
+            </p>
+          </div>
+
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">
+              Prayer Times
+            </h2>
+            <div id="prayer-times" class="grid grid-cols-2 gap-4">
+              <!-- Prayer times will be loaded here -->
             </div>
-            
-            <!-- Prayer Times Screen -->
-            <div id="prayer-screen" class="p-4 hidden">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Prayer Times</h1>
-                    <div class="flex justify-center items-center mt-2">
-                        <select class="border rounded px-3 py-1 text-sm">
-                            <option>New York, USA</option>
-                            <option>London, UK</option>
-                            <option>Dubai, UAE</option>
-                            <option>Riyadh, KSA</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-700 text-sm">
-                                <th class="py-2 px-4 text-left">Date</th>
-                                <th class="py-2 px-4">Fajr</th>
-                                <th class="py-2 px-4">Sunrise</th>
-                                <th class="py-2 px-4">Dhuhr</th>
-                                <th class="py-2 px-4">Asr</th>
-                                <th class="py-2 px-4">Maghrib</th>
-                                <th class="py-2 px-4">Isha</th>
-                            </tr>
-                        </thead>
-                        <tbody id="prayer-times-table">
-                            <!-- Will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
+          </div>
+
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">
+              Quick Actions
+            </h2>
+            <div class="grid grid-cols-2 gap-4">
+              <button
+                onclick="showScreen('duas-screen')"
+                class="bg-green-100 text-green-800 p-4 rounded-lg flex items-center justify-center flex-col"
+              >
+                <i class="fas fa-hands-praying text-2xl mb-2"></i>
+                <span>Duas</span>
+              </button>
+              <button
+                onclick="showScreen('tasbih-screen')"
+                class="bg-purple-100 text-purple-800 p-4 rounded-lg flex items-center justify-center flex-col"
+              >
+                <i class="fas fa-dharmachakra text-2xl mb-2"></i>
+                <span>Tasbih</span>
+              </button>
             </div>
-            
-            <!-- Duas Screen -->
-            <div id="duas-screen" class="p-4 hidden">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Daily Duas</h1>
-                </div>
-                
-                <div class="mb-6">
-                    <h2 class="font-semibold text-lg mb-3 text-gray-800">Morning & Evening</h2>
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-lg shadow p-4 dua-card">
-                            <h3 class="font-medium text-blue-600 mb-1">Dua for Morning</h3>
-                            <p class="text-gray-700 mb-2">"O Allah, by Your leave we have reached the morning and by Your leave we have reached the evening..."</p>
-                            <div class="flex justify-between items-center text-sm text-gray-500">
-                                <span>Reference: Abu Dawood</span>
-                                <button class="text-blue-500"><i class="far fa-bookmark"></i></button>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-4 dua-card">
-                            <h3 class="font-medium text-blue-600 mb-1">Dua for Evening</h3>
-                            <p class="text-gray-700 mb-2">"O Allah, by Your leave we have reached the evening and by Your leave we have reached the morning..."</p>
-                            <div class="flex justify-between items-center text-sm text-gray-500">
-                                <span>Reference: Abu Dawood</span>
-                                <button class="text-blue-500"><i class="far fa-bookmark"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-6">
-                    <h2 class="font-semibold text-lg mb-3 text-gray-800">Daily Activities</h2>
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-lg shadow p-4 dua-card">
-                            <h3 class="font-medium text-blue-600 mb-1">Before Eating</h3>
-                            <p class="text-gray-700 mb-2">"Bismillah (In the name of Allah)."</p>
-                            <div class="flex justify-between items-center text-sm text-gray-500">
-                                <span>Reference: Bukhari</span>
-                                <button class="text-blue-500"><i class="far fa-bookmark"></i></button>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-4 dua-card">
-                            <h3 class="font-medium text-blue-600 mb-1">After Eating</h3>
-                            <p class="text-gray-700 mb-2">"Alhamdulillah (All praise is for Allah)."</p>
-                            <div class="flex justify-between items-center text-sm text-gray-500">
-                                <span>Reference: Abu Dawood</span>
-                                <button class="text-blue-500"><i class="far fa-bookmark"></i></button>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-4 dua-card">
-                            <h3 class="font-medium text-blue-600 mb-1">Entering Home</h3>
-                            <p class="text-gray-700 mb-2">"Bismillahi walajna, wa bismillahi kharajna, wa 'ala rabbina tawakkalna (In the name of Allah we enter, in the name of Allah we leave, and upon our Lord we rely)."</p>
-                            <div class="flex justify-between items-center text-sm text-gray-500">
-                                <span>Reference: Abu Dawood</span>
-                                <button class="text-blue-500"><i class="far fa-bookmark"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          </div>
+
+          <div>
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">
+              Today's Hadith
+            </h2>
+            <div
+              class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg"
+            >
+              <p class="text-gray-700 italic mb-2">
+                "The most beloved deed to Allah is the most regular and constant
+                even if it were little."
+              </p>
+              <p class="text-gray-600 text-sm">Sahih al-Bukhari 6464</p>
             </div>
-            
-            <!-- Tasbih Screen -->
-            <div id="tasbih-screen" class="p-4 hidden">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Tasbih Counter</h1>
-                </div>
-                
-                <div class="flex flex-col items-center justify-center mb-8">
-                    <div class="bg-blue-100 rounded-full w-48 h-48 flex items-center justify-center mb-6 shadow-inner">
-                        <span id="counter-value" class="text-5xl font-bold text-blue-700">0</span>
-                    </div>
-                    <button id="count-btn" class="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-lg tasbih-counter">
-                        <i class="fas fa-hand-pointer text-2xl"></i>
-                    </button>
-                </div>
-                
-                <div class="flex justify-between mb-6">
-                    <button id="reset-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg">
-                        <i class="fas fa-redo mr-2"></i>Reset
-                    </button>
-                    <button id="save-btn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
-                        <i class="fas fa-save mr-2"></i>Save
-                    </button>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-4">
-                    <h3 class="font-semibold text-gray-800 mb-2">Saved Counts</h3>
-                    <ul id="saved-counts" class="space-y-2">
-                        <!-- Will be populated by JavaScript -->
-                    </ul>
-                </div>
+          </div>
+        </div>
+
+        <!-- Prayer Times Screen -->
+        <div id="prayer-screen" class="p-4 hidden">
+          <div class="flex items-center mb-6">
+            <button
+              onclick="showScreen('home-screen')"
+              class="mr-4 text-gray-600"
+            >
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800">Prayer Times</h1>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="font-semibold text-gray-800" id="prayer-location">
+                  Loading location...
+                </h2>
+                <p class="text-sm text-gray-500" id="prayer-hijri-date"></p>
+              </div>
+              <button onclick="showLocationSettings()" class="text-blue-500">
+                <i class="fas fa-cog"></i>
+              </button>
             </div>
-            
-            <!-- Profile Screen -->
-            <div id="profile-screen" class="p-4 hidden">
-                <div class="text-center mb-6">
-                    <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                        <img src="https://via.placeholder.com/150" alt="Profile" class="w-full h-full object-cover">
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-800">John Doe</h1>
-                    <p class="text-gray-600">New York, USA</p>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-4 mb-6">
-                    <h3 class="font-semibold text-gray-800 mb-3">Account Settings</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-center justify-between">
-                            <span class="text-gray-700"><i class="fas fa-user-circle mr-2 text-blue-500"></i> Edit Profile</span>
-                            <i class="fas fa-chevron-right text-gray-400"></i>
-                        </li>
-                        <li class="flex items-center justify-between">
-                            <span class="text-gray-700"><i class="fas fa-bell mr-2 text-blue-500"></i> Notifications</span>
-                            <i class="fas fa-chevron-right text-gray-400"></i>
-                        </li>
-                        <li class="flex items-center justify-between">
-                            <span class="text-gray-700"><i class="fas fa-moon mr-2 text-blue-500"></i> Dark Mode</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-4 mb-6">
-                    <h3 class="font-semibold text-gray-800 mb-3">App Settings</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-center justify-between">
-                            <span class="text-gray-700"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i> Location</span>
-                            <span class="text-gray-500">New York, USA <i class="fas fa-chevron-right ml-2 text-gray-400"></i></span>
-                        </li>
-                        <li class="flex items-center justify-between">
-                            <span class="text-gray-700"><i class="fas fa-clock mr-2 text-blue-500"></i> Calculation Method</span>
-                            <span class="text-gray-500">ISNA <i class="fas fa-chevron-right ml-2 text-gray-400"></i></span>
-                        </li>
-                        <li class="flex items-center justify-between">
-                            <span class="text-gray-700"><i class="fas fa-volume-up mr-2 text-blue-500"></i> Adhan Reminder</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </li>
-                    </ul>
-                </div>
-                
-                <button class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                </button>
+
+            <div id="detailed-prayer-times">
+              <!-- Detailed prayer times will be loaded here -->
             </div>
-        </main>
-        
-        <!-- Bottom Navigation -->
-        <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full max-w-md">
-            <div class="flex justify-around">
-                <button onclick="showScreen('home-screen')" class="py-3 px-4 flex flex-col items-center text-blue-500 active-tab">
-                    <i class="fas fa-home text-xl"></i>
-                    <span class="text-xs mt-1">Home</span>
-                </button>
-                <button onclick="showScreen('prayer-screen')" class="py-3 px-4 flex flex-col items-center text-gray-500">
-                    <i class="fas fa-clock text-xl"></i>
-                    <span class="text-xs mt-1">Prayer</span>
-                </button>
-                <button onclick="showScreen('duas-screen')" class="py-3 px-4 flex flex-col items-center text-gray-500">
-                    <i class="fas fa-person-praying text-xl"></i>
-                    <span class="text-xs mt-1">Duas</span>
-                </button>
-                <button onclick="showScreen('tasbih-screen')" class="py-3 px-4 flex flex-col items-center text-gray-500">
-                    <i class="fas fa-hands-praying text-xl"></i>
-                    <span class="text-xs mt-1">Tasbih</span>
-                </button>
-                <button onclick="showScreen('profile-screen')" class="py-3 px-4 flex flex-col items-center text-gray-500">
-                    <i class="fas fa-user text-xl"></i>
-                    <span class="text-xs mt-1">Profile</span>
-                </button>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="font-semibold text-gray-800 mb-4">Monthly Calendar</h3>
+            <div id="prayer-calendar" class="text-center">
+              <p class="text-gray-500">Loading calendar...</p>
             </div>
-        </nav>
+          </div>
+        </div>
+
+        <!-- Duas Screen -->
+        <div id="duas-screen" class="p-4 hidden">
+          <div class="flex items-center mb-6">
+            <button
+              onclick="showScreen('home-screen')"
+              class="mr-4 text-gray-600"
+            >
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800">Duas</h1>
+          </div>
+
+          <div class="flex mb-6 overflow-x-auto pb-2">
+            <button
+              id="all-duas-tab"
+              onclick="showDuaCategory('all')"
+              class="px-4 py-2 bg-blue-500 text-white rounded-full mr-2 whitespace-nowrap"
+            >
+              All Duas
+            </button>
+            <button
+              id="favorite-duas-tab"
+              onclick="showDuaCategory('favorites')"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-full mr-2 whitespace-nowrap"
+            >
+              Favorites
+            </button>
+            <button
+              id="custom-duas-tab"
+              onclick="showDuaCategory('custom')"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap"
+            >
+              My Duas
+            </button>
+          </div>
+
+          <div class="mb-4 relative">
+            <input
+              type="text"
+              id="dua-search"
+              placeholder="Search duas..."
+              class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+          </div>
+
+          <!-- All Duas -->
+          <div id="all-duas" class="space-y-3">
+            <!-- Duas will be loaded here -->
+          </div>
+
+          <!-- Favorite Duas -->
+          <div id="favorite-duas" class="space-y-3 hidden">
+            <!-- Favorite duas will be loaded here -->
+          </div>
+
+          <!-- Custom Duas -->
+          <div id="custom-duas" class="space-y-3 hidden">
+            <button
+              onclick="showAddDuaModal()"
+              class="w-full p-4 bg-green-500 text-white rounded-lg flex items-center justify-center"
+            >
+              <i class="fas fa-plus mr-2"></i> Add New Dua
+            </button>
+            <div id="custom-duas-list">
+              <!-- Custom duas will be loaded here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tasbih Screen -->
+        <div id="tasbih-screen" class="p-4 hidden">
+          <div class="flex items-center mb-6">
+            <button
+              onclick="showScreen('home-screen')"
+              class="mr-4 text-gray-600"
+            >
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800">Tasbih Counter</h1>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg p-6 mb-6 text-center">
+            <div
+              class="text-6xl font-bold text-gray-800 mb-6"
+              id="counter-display"
+            >
+              0
+            </div>
+            <div class="flex justify-center space-x-4 mb-6">
+              <button
+                onclick="incrementCounter()"
+                class="bg-blue-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl"
+              >
+                <i class="fas fa-plus"></i>
+              </button>
+              <button
+                onclick="resetCounter()"
+                class="bg-gray-200 text-gray-800 w-16 h-16 rounded-full flex items-center justify-center text-2xl"
+              >
+                <i class="fas fa-redo"></i>
+              </button>
+            </div>
+            <div class="text-gray-600 mb-4">
+              Current Dhikr:
+              <span id="current-dhikr" class="font-medium">SubhanAllah</span>
+            </div>
+            <div class="flex justify-center space-x-2">
+              <button
+                onclick="setDhikr('SubhanAllah')"
+                class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+              >
+                SubhanAllah
+              </button>
+              <button
+                onclick="setDhikr('Alhamdulillah')"
+                class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm"
+              >
+                Alhamdulillah
+              </button>
+              <button
+                onclick="setDhikr('AllahuAkbar')"
+                class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm"
+              >
+                Allahu Akbar
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="font-semibold text-gray-800 mb-4">History</h3>
+            <div id="tasbih-history">
+              <!-- History will be loaded here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div id="profile-screen" class="p-4 hidden">
+          <div class="flex items-center mb-6">
+            <button
+              onclick="showScreen('home-screen')"
+              class="mr-4 text-gray-600"
+            >
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800">Profile</h1>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="flex items-center mb-4">
+              <div
+                class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-500 text-2xl mr-4"
+              >
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <h2 class="font-semibold text-gray-800" id="profile-name">
+                  User
+                </h2>
+                <p class="text-gray-500 text-sm">
+                  Member since <span id="member-since">2023</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <button
+                onclick="showEditProfileModal()"
+                class="w-full p-3 bg-gray-100 rounded-lg flex items-center justify-between text-gray-700"
+              >
+                <span>Edit Profile</span>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              <button
+                onclick="showLocationSettings()"
+                class="w-full p-3 bg-gray-100 rounded-lg flex items-center justify-between text-gray-700"
+              >
+                <span>Prayer Location</span>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              <button
+                onclick="showNotificationSettings()"
+                class="w-full p-3 bg-gray-100 rounded-lg flex items-center justify-between text-gray-700"
+              >
+                <span>Notifications</span>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h3 class="font-semibold text-gray-800 mb-4">App Settings</h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">Dark Mode</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="dark-mode-toggle"
+                    class="sr-only peer"
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                  ></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">Language</span>
+                <select
+                  id="language-select"
+                  class="bg-gray-100 border border-gray-300 text-gray-700 rounded-lg px-3 py-1.5"
+                >
+                  <option value="en">English</option>
+                  <option value="ar">العربية</option>
+                  <option value="ur">اردو</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onclick="showAboutApp()"
+            class="w-full p-3 bg-white rounded-xl shadow-md mb-6 text-left flex items-center justify-between text-gray-700"
+          >
+            <span>About App</span>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+
+          <button
+            onclick="logout()"
+            class="w-full p-3 bg-red-500 text-white rounded-lg flex items-center justify-center"
+          >
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div
+        class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 flex justify-around items-center h-16 max-w-md mx-auto"
+      >
+        <button
+          onclick="showScreen('home-screen')"
+          class="flex flex-col items-center justify-center h-full text-blue-500"
+        >
+          <i class="fas fa-home text-xl"></i>
+          <span class="text-xs mt-1">Home</span>
+        </button>
+        <button
+          onclick="showScreen('prayer-screen')"
+          class="flex flex-col items-center justify-center h-full text-gray-500"
+        >
+          <i class="fas fa-clock text-xl"></i>
+          <span class="text-xs mt-1">Prayer</span>
+        </button>
+        <button
+          onclick="showScreen('duas-screen')"
+          class="flex flex-col items-center justify-center h-full text-gray-500"
+        >
+          <i class="fas fa-hands-praying text-xl"></i>
+          <span class="text-xs mt-1">Duas</span>
+        </button>
+        <button
+          onclick="showScreen('tasbih-screen')"
+          class="flex flex-col items-center justify-center h-full text-gray-500"
+        >
+          <i class="fas fa-dharmachakra text-xl"></i>
+          <span class="text-xs mt-1">Tasbih</span>
+        </button>
+        <button
+          onclick="showScreen('profile-screen')"
+          class="flex flex-col items-center justify-center h-full text-gray-500"
+        >
+          <i class="fas fa-user text-xl"></i>
+          <span class="text-xs mt-1">Profile</span>
+        </button>
+      </div>
+
+      <!-- Modals -->
+
+      <!-- Dua Detail Modal -->
+      <div
+        id="dua-detail-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"
+      >
+        <div
+          class="bg-white rounded-xl w-full max-w-md max-h-[80vh] overflow-y-auto slide-up"
+        >
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-800" id="dua-modal-title">
+                Dua Title
+              </h3>
+              <button
+                onclick="closeModal('dua-detail-modal')"
+                class="text-gray-500"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="mb-6">
+              <p class="text-gray-700 mb-4" id="dua-modal-content">
+                Dua content goes here...
+              </p>
+              <p class="text-gray-500 text-sm" id="dua-modal-reference">
+                Reference: Sahih Bukhari
+              </p>
+            </div>
+            <div class="flex justify-between items-center">
+              <button
+                id="dua-favorite-btn"
+                onclick="toggleFavoriteDua()"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center"
+              >
+                <i class="far fa-heart mr-2"></i> Favorite
+              </button>
+              <button
+                onclick="closeModal('dua-detail-modal')"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Dua Modal -->
+      <div
+        id="add-dua-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"
+      >
+        <div class="bg-white rounded-xl w-full max-w-md slide-up">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-800">Add New Dua</h3>
+              <button
+                onclick="closeModal('add-dua-modal')"
+                class="text-gray-500"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700 mb-2">Title</label>
+              <input
+                type="text"
+                id="new-dua-title"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700 mb-2">Content</label>
+              <textarea
+                id="new-dua-content"
+                rows="4"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              ></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                onclick="closeModal('add-dua-modal')"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onclick="saveCustomDua()"
+                class="px-4 py-2 bg-green-500 text-white rounded-lg"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location Settings Modal -->
+      <div
+        id="location-settings-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"
+      >
+        <div class="bg-white rounded-xl w-full max-w-md slide-up">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-800">Prayer Location</h3>
+              <button
+                onclick="closeModal('location-settings-modal')"
+                class="text-gray-500"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700 mb-2">Country</label>
+              <select
+                id="country-select"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Country</option>
+                <option value="US">United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="SA">Saudi Arabia</option>
+                <option value="AE">United Arab Emirates</option>
+                <option value="PK">Pakistan</option>
+                <option value="IN">India</option>
+                <option value="MY">Malaysia</option>
+                <option value="ID">Indonesia</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700 mb-2">City</label>
+              <input
+                type="text"
+                id="city-input"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700 mb-2">Calculation Method</label>
+              <select
+                id="method-select"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="0">Shia Ithna-Ashari</option>
+                <option value="1">
+                  University of Islamic Sciences, Karachi
+                </option>
+                <option value="2">Islamic Society of North America</option>
+                <option value="3">Muslim World League</option>
+                <option value="4">Umm al-Qura, Makkah</option>
+                <option value="5">Egyptian General Authority of Survey</option>
+                <option value="7">
+                  Institute of Geophysics, University of Tehran
+                </option>
+              </select>
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                onclick="closeModal('location-settings-modal')"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onclick="saveLocationSettings()"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Profile Modal -->
+      <div
+        id="edit-profile-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"
+      >
+        <div class="bg-white rounded-xl w-full max-w-md slide-up">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-800">Edit Profile</h3>
+              <button
+                onclick="closeModal('edit-profile-modal')"
+                class="text-gray-500"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700 mb-2">Name</label>
+              <input
+                type="text"
+                id="profile-name-input"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                id="profile-email-input"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                onclick="closeModal('edit-profile-modal')"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onclick="saveProfile()"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Settings Modal -->
+      <div
+        id="notification-settings-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"
+      >
+        <div class="bg-white rounded-xl w-full max-w-md slide-up">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-800">
+                Notification Settings
+              </h3>
+              <button
+                onclick="closeModal('notification-settings-modal')"
+                class="text-gray-500"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">
+                    Prayer Time Notifications
+                  </h4>
+                  <p class="text-sm text-gray-500">
+                    Get notified before each prayer time
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="prayer-notifications-toggle"
+                    class="sr-only peer"
+                    checked
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                  ></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">
+                    Reminder Notifications
+                  </h4>
+                  <p class="text-sm text-gray-500">
+                    Daily reminders for morning and evening adhkar
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="reminder-notifications-toggle"
+                    class="sr-only peer"
+                    checked
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                  ></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">Friday Reminder</h4>
+                  <p class="text-sm text-gray-500">
+                    Weekly reminder for Jummah prayer
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="friday-notifications-toggle"
+                    class="sr-only peer"
+                    checked
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                  ></div>
+                </label>
+              </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+              <button
+                onclick="saveNotificationSettings()"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+              >
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About App Modal -->
+      <div
+        id="about-app-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"
+      >
+        <div class="bg-white rounded-xl w-full max-w-md slide-up">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-800">
+                About My Prayer App
+              </h3>
+              <button
+                onclick="closeModal('about-app-modal')"
+                class="text-gray-500"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="mb-6">
+              <div class="flex items-center justify-center mb-6">
+                <div
+                  class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-500 text-3xl mr-4"
+                >
+                  <i class="fas fa-mosque"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg">My Prayer App</h4>
+                  <p class="text-gray-500">Version 1.0.0</p>
+                </div>
+              </div>
+              <p class="text-gray-700 mb-4">
+                My Prayer App is designed to help Muslims keep track of their
+                daily prayers, duas, and dhikr. With accurate prayer times, a
+                comprehensive dua collection, and a digital tasbih counter, it's
+                your perfect companion for daily worship.
+              </p>
+              <p class="text-gray-700">
+                May this app help you strengthen your connection with Allah and
+                make your worship more meaningful.
+              </p>
+            </div>
+            <div class="flex justify-center">
+              <button
+                onclick="closeModal('about-app-modal')"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Function to show selected screen and hide others
-        function showScreen(screenId) {
-            // Hide all screens
-            document.querySelectorAll('main > div').forEach(screen => {
-                screen.classList.add('hidden');
-            });
-            
-            // Show selected screen
-            document.getElementById(screenId).classList.remove('hidden');
-            
-            // Update active tab styling
-            document.querySelectorAll('nav button').forEach(button => {
-                button.classList.remove('text-blue-500', 'active-tab');
-                button.classList.add('text-gray-500');
-            });
-            
-            // Find the button that corresponds to the shown screen and make it active
-            const navButtons = document.querySelectorAll('nav button');
-            for (let i = 0; i < navButtons.length; i++) {
-                if (navButtons[i].getAttribute('onclick').includes(screenId)) {
-                    navButtons[i].classList.remove('text-gray-500');
-                    navButtons[i].classList.add('text-blue-500', 'active-tab');
-                    break;
-                }
-            }
-        }
-        
-        // Initialize prayer times (in a real app, these would come from an API)
-        function initializePrayerTimes() {
-            const now = new Date();
-            const currentDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('current-date').textContent = currentDate;
-            
-            // Set prayer times (example data)
-            document.getElementById('fajr-time').textContent = '05:12 AM';
-            document.getElementById('sunrise-time').textContent = '06:30 AM';
-            document.getElementById('dhuhr-time').textContent = '12:30 PM';
-            document.getElementById('asr-time').textContent = '03:45 PM';
-            document.getElementById('maghrib-time').textContent = '06:15 PM';
-            document.getElementById('isha-time').textContent = '08:00 PM';
-            
-            // Set next prayer (example logic)
-            document.getElementById('next-prayer-name').textContent = 'Dhuhr';
-            document.getElementById('next-prayer-time').textContent = '12:30 PM';
-            document.getElementById('time-remaining').textContent = '2h 15m';
-            
-            // Populate prayer times table
-            const tableBody = document.getElementById('prayer-times-table');
-            const days = ['Today', 'Tomorrow', 'Day after'];
-            
-            for (let i = 0; i < 3; i++) {
-                const row = document.createElement('tr');
-                row.className = i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-                
-                const dateCell = document.createElement('td');
-                dateCell.className = 'py-2 px-4 text-sm';
-                const nextDate = new Date();
-                nextDate.setDate(now.getDate() + i);
-                dateCell.textContent = nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                row.appendChild(dateCell);
-                
-                ['05:12 AM', '06:30 AM', '12:30 PM', '03:45 PM', '06:15 PM', '08:00 PM'].forEach(time => {
-                    const cell = document.createElement('td');
-                    cell.className = 'py-2 px-4 text-center text-sm';
-                    cell.textContent = time;
-                    row.appendChild(cell);
-                });
-                
-                tableBody.appendChild(row);
-            }
-        }
-        
-        // Tasbih counter functionality
-        function initializeTasbihCounter() {
-            let count = 0;
-            const savedCounts = JSON.parse(localStorage.getItem('tasbihCounts')) || [];
-            
-            document.getElementById('count-btn').addEventListener('click', () => {
-                count++;
-                document.getElementById('counter-value').textContent = count;
-            });
-            
-            document.getElementById('reset-btn').addEventListener('click', () => {
-                count = 0;
-                document.getElementById('counter-value').textContent = count;
-            });
-            
-            document.getElementById('save-btn').addEventListener('click', () => {
-                if (count > 0) {
-                    const now = new Date();
-                    const timestamp = now.toLocaleString();
-                    savedCounts.unshift({ count, timestamp });
-                    localStorage.setItem('tasbihCounts', JSON.stringify(savedCounts));
-                    updateSavedCounts();
-                    count = 0;
-                    document.getElementById('counter-value').textContent = count;
-                }
-            });
-            
-            function updateSavedCounts() {
-                const savedCountsList = document.getElementById('saved-counts');
-                savedCountsList.innerHTML = '';
-                
-                if (savedCounts.length === 0) {
-                    const emptyItem = document.createElement('li');
-                    emptyItem.className = 'text-gray-500 text-center py-2';
-                    emptyItem.textContent = 'No saved counts yet';
-                    savedCountsList.appendChild(emptyItem);
-                } else {
-                    savedCounts.forEach(item => {
-                        const listItem = document.createElement('li');
-                        listItem.className = 'flex justify-between items-center py-2 border-b border-gray-100';
-                        
-                        const countSpan = document.createElement('span');
-                        countSpan.className = 'font-medium text-blue-600';
-                        countSpan.textContent = `${item.count} counts`;
-                        
-                        const timeSpan = document.createElement('span');
-                        timeSpan.className = 'text-sm text-gray-500';
-                        timeSpan.textContent = item.timestamp;
-                        
-                        listItem.appendChild(countSpan);
-                        listItem.appendChild(timeSpan);
-                        savedCountsList.appendChild(listItem);
-                    });
-                }
-            }
-            
-            updateSavedCounts();
-        }
-        
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initializePrayerTimes();
-            initializeTasbihCounter();
+      // Sample data for duas
+      const duas = [
+        {
+          id: 1,
+          title: "Morning Adhkar",
+          content:
+            "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+          reference: "Muslim 4/2088",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/after_salah.jpg",
+        },
+        {
+          id: 2,
+          title: "Evening Adhkar",
+          content:
+            "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+          reference: "Muslim 4/2088",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/before_sleep.jpg",
+        },
+        {
+          id: 3,
+          title: "Dua Before Sleeping",
+          content:
+            "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ",
+          reference: "Bukhari 11/126",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/dhikr.jpg",
+        },
+        {
+          id: 4,
+          title: "Dua After Waking Up",
+          content:
+            "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+          reference: "Bukhari 11/126",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/istighfar.jpg",
+        },
+        {
+          id: 5,
+          title: "Dua Before Eating",
+          content: "بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ",
+          reference: "Abu Dawud 3/347",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/morning.jpg",
+        },
+        {
+          id: 6,
+          title: "Dua After Eating",
+          content:
+            "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ",
+          reference: "Tirmidhi 5/506",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/ruqyah.jpg",
+        },
+        {
+          id: 7,
+          title: "Dua When Entering the Mosque",
+          content:
+            "أَعُوذُ بِاللَّهِ الْعَظِيمِ وَبِوَجْهِهِ الْكَرِيمِ وَسُلْطَانِهِ الْقَدِيمِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+          reference: "Abu Dawud 1/123",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/salah.jpg",
+        },
+        {
+          id: 8,
+          title: "Dua When Leaving the Mosque",
+          content: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
+          reference: "Muslim 2/155",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/salawat.jpg",
+        },
+        {
+          id: 9,
+          title: "Dua for Anxiety",
+          content:
+            "اللَّهُمَّ إِنِّي عَبْدُكَ وَابْنُ عَبْدِكَ وَابْنُ أَمَتِكَ نَاصِيَتِي بِيَدِكَ مَاضٍ فِيَّ حُكْمُكَ عَدْلٌ فِيَّ قَضَاؤُكَ أَسْأَلُكَ بِكُلِّ اسْمٍ هُوَ لَكَ سَمَّيْتَ بِهِ نَفْسَكَ أَوْ أَنْزَلْتَهُ فِي كِتَابِكَ أَوْ عَلَّمْتَهُ أَحَدًا مِنْ خَلْقِكَ أَوِ اسْتَأْثَرْتَ بِهِ فِي عِلْمِ الْغَيْبِ عِنْدَكَ أَنْ تَجْعَلَ الْقُرْآنَ رَبِيعَ قَلْبِي وَنُورَ صَدْرِي وَجَلَاءَ حُزْنِي وَذَهَابَ هَمِّي",
+          reference: "Ahmad 1/391",
+          isFavorite: false,
+          image:
+            "https://raw.githubusercontent.com/mrezaperdana/prayerApp/main/assets/sunnah.jpg",
+        },
+        {
+          id: 10,
+          title: "Dua for Forgiveness",
+          content:
+            "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي",
+          reference: "Tirmidhi 5/529",
+          isFavorite: false,
+        },
+      ];
+
+      // Sample prayer times
+      const prayerTimes = {
+        Fajr: "5:30 AM",
+        Sunrise: "6:45 AM",
+        Dhuhr: "12:30 PM",
+        Asr: "3:45 PM",
+        Maghrib: "6:20 PM",
+        Isha: "8:00 PM",
+      };
+
+      // Sample monthly calendar data
+      const monthlyCalendar = [
+        {
+          date: "1",
+          day: "Mon",
+          fajr: "5:30",
+          dhuhr: "12:30",
+          asr: "3:45",
+          maghrib: "6:20",
+          isha: "8:00",
+        },
+        {
+          date: "2",
+          day: "Tue",
+          fajr: "5:29",
+          dhuhr: "12:30",
+          asr: "3:45",
+          maghrib: "6:21",
+          isha: "8:01",
+        },
+        {
+          date: "3",
+          day: "Wed",
+          fajr: "5:28",
+          dhuhr: "12:30",
+          asr: "3:45",
+          maghrib: "6:22",
+          isha: "8:02",
+        },
+        {
+          date: "4",
+          day: "Thu",
+          fajr: "5:27",
+          dhuhr: "12:30",
+          asr: "3:45",
+          maghrib: "6:23",
+          isha: "8:03",
+        },
+        {
+          date: "5",
+          day: "Fri",
+          fajr: "5:26",
+          dhuhr: "12:30",
+          asr: "3:45",
+          maghrib: "6:24",
+          isha: "8:04",
+        },
+        {
+          date: "6",
+          day: "Sat",
+          fajr: "5:25",
+          dhuhr: "12:30",
+          asr: "3:45",
+          maghrib: "6:25",
+          isha: "8:05",
+        },
+        {
+          date: "7",
+          day: "Sun",
+          fajr: "5:24",
+          dhuhr: "12:30",
+          asr: "3:45",
+          maghrib: "6:26",
+          isha: "8:06",
+        },
+      ];
+
+      // Sample tasbih history
+      const tasbihHistory = [
+        { date: "Today", dhikr: "SubhanAllah", count: 33 },
+        { date: "Yesterday", dhikr: "Alhamdulillah", count: 33 },
+        { date: "Jun 10", dhikr: "Allahu Akbar", count: 34 },
+      ];
+
+      // Current user data
+      let userData = {
+        name: "User",
+        email: "user@example.com",
+        memberSince: "2023",
+        location: {
+          country: "US",
+          city: "New York",
+          method: "2",
+        },
+        notifications: {
+          prayer: true,
+          reminder: true,
+          friday: true,
+        },
+        darkMode: false,
+        language: "en",
+      };
+
+      // Current tasbih counter
+      let counter = 0;
+      let currentDhikr = "SubhanAllah";
+      let customDuas = [];
+
+      // Initialize the app
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set current date
+        const now = new Date();
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        };
+        document.getElementById("current-date").textContent =
+          now.toLocaleDateString("en-US", options);
+
+        // Load prayer times
+        loadPrayerTimes();
+
+        // Load duas
+        loadDuas();
+
+        // Load custom duas from localStorage
+        loadCustomDuas();
+
+        // Load tasbih history
+        loadTasbihHistory();
+
+        // Load user profile
+        loadUserProfile();
+
+        // Set active tab in bottom nav
+        setActiveNav("home");
+
+        // Load user preferences
+        loadUserPreferences();
+      });
+
+      // Show screen function
+      function showScreen(screenId) {
+        // Hide all screens
+        document.querySelectorAll('[id$="-screen"]').forEach((screen) => {
+          screen.classList.add("hidden");
         });
+
+        // Show the selected screen
+        document.getElementById(screenId).classList.remove("hidden");
+
+        // Update active nav
+        const navId = screenId.split("-")[0];
+        setActiveNav(navId);
+
+        // Refresh content if needed
+        if (screenId === "prayer-screen") {
+          loadDetailedPrayerTimes();
+          loadPrayerCalendar();
+        } else if (screenId === "duas-screen") {
+          loadDuas();
+        } else if (screenId === "tasbih-screen") {
+          updateCounterDisplay();
+        }
+      }
+
+      // Set active nav
+      function setActiveNav(navId) {
+        // Reset all nav items
+        document.querySelectorAll(".bottom-nav button").forEach((btn) => {
+          btn.classList.remove("text-blue-500");
+          btn.classList.add("text-gray-500");
+        });
+
+        // Set active nav item
+        const activeBtn = document.querySelector(
+          `.bottom-nav button[onclick="showScreen('${navId}-screen')"]`
+        );
+        if (activeBtn) {
+          activeBtn.classList.remove("text-gray-500");
+          activeBtn.classList.add("text-blue-500");
+        }
+      }
+
+      // Load prayer times
+      function loadPrayerTimes() {
+        const prayerTimesContainer = document.getElementById("prayer-times");
+        prayerTimesContainer.innerHTML = "";
+
+        for (const [prayer, time] of Object.entries(prayerTimes)) {
+          const prayerCard = document.createElement("div");
+          prayerCard.className =
+            "bg-white rounded-lg shadow-md p-4 text-center prayer-card";
+
+          const prayerName = document.createElement("h3");
+          prayerName.className = "font-semibold text-gray-800 mb-1";
+          prayerName.textContent = prayer;
+
+          const prayerTime = document.createElement("p");
+          prayerTime.className = "text-blue-500 font-bold text-lg";
+          prayerTime.textContent = time;
+
+          prayerCard.appendChild(prayerName);
+          prayerCard.appendChild(prayerTime);
+          prayerTimesContainer.appendChild(prayerCard);
+        }
+      }
+
+      // Load detailed prayer times
+      function loadDetailedPrayerTimes() {
+        document.getElementById("prayer-location").textContent = `${
+          userData.location.city
+        }, ${getCountryName(userData.location.country)}`;
+
+        // Set hijri date (simplified)
+        const hijriDate = "15 Dhul-Qa'dah 1444";
+        document.getElementById("prayer-hijri-date").textContent = hijriDate;
+
+        const container = document.getElementById("detailed-prayer-times");
+        container.innerHTML = "";
+
+        for (const [prayer, time] of Object.entries(prayerTimes)) {
+          const prayerItem = document.createElement("div");
+          prayerItem.className =
+            "flex items-center justify-between py-3 border-b border-gray-100";
+
+          const prayerName = document.createElement("span");
+          prayerName.className = "font-medium text-gray-800";
+          prayerName.textContent = prayer;
+
+          const prayerTime = document.createElement("span");
+          prayerTime.className = "font-bold text-gray-800";
+          prayerTime.textContent = time;
+
+          prayerItem.appendChild(prayerName);
+          prayerItem.appendChild(prayerTime);
+          container.appendChild(prayerItem);
+        }
+      }
+
+      // Load prayer calendar
+      function loadPrayerCalendar() {
+        const container = document.getElementById("prayer-calendar");
+        container.innerHTML = "";
+
+        // Create table
+        const table = document.createElement("table");
+        table.className = "w-full";
+
+        // Create header
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        headerRow.className = "bg-gray-100";
+
+        const headers = [
+          "Date",
+          "Day",
+          "Fajr",
+          "Dhuhr",
+          "Asr",
+          "Maghrib",
+          "Isha",
+        ];
+        headers.forEach((headerText) => {
+          const th = document.createElement("th");
+          th.className = "py-2 px-1 text-sm font-medium text-gray-700";
+          th.textContent = headerText;
+          headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create body
+        const tbody = document.createElement("tbody");
+        monthlyCalendar.forEach((day) => {
+          const row = document.createElement("tr");
+          row.className = "border-b border-gray-100";
+
+          const cells = [
+            day.date,
+            day.day,
+            day.fajr,
+            day.dhuhr,
+            day.asr,
+            day.maghrib,
+            day.isha,
+          ];
+          cells.forEach((cellText, index) => {
+            const td = document.createElement("td");
+            td.className = `py-2 px-1 text-center text-sm ${
+              index === 0 ? "font-medium" : ""
+            }`;
+            td.textContent = cellText;
+            row.appendChild(td);
+          });
+
+          tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        container.appendChild(table);
+      }
+
+      // Load duas
+      function loadDuas() {
+        const container = document.getElementById("all-duas");
+        container.innerHTML = "";
+
+        duas.forEach((dua) => {
+          const duaButton = document.createElement("button");
+          duaButton.className =
+            "w-full p-4 rounded-lg shadow-sm text-left dua-button flex justify-between items-center bg-cover bg-center relative overflow-hidden";
+          duaButton.onclick = () => showDuaDetail(dua.id);
+
+          // Set background image
+          if (dua.image) {
+            duaButton.style.backgroundImage = `url('${dua.image}')`;
+          } else {
+            duaButton.classList.add("bg-white"); // fallback background if no image
+          }
+
+          // Optional: add a dark overlay to improve text readability
+          const overlay = document.createElement("div");
+          overlay.className = "absolute inset-0 bg-black bg-opacity-40";
+          duaButton.appendChild(overlay);
+
+          // Text content (on top of image)
+          const contentWrapper = document.createElement("div");
+          contentWrapper.className =
+            "relative z-10 flex justify-between w-full items-center";
+
+          const duaTitle = document.createElement("span");
+          duaTitle.className = "font-semibold text-white";
+          duaTitle.textContent = dua.title;
+
+          const icon = document.createElement("i");
+          icon.className = "fas fa-chevron-right text-white";
+
+          contentWrapper.appendChild(duaTitle);
+          contentWrapper.appendChild(icon);
+          duaButton.appendChild(contentWrapper);
+          container.appendChild(duaButton);
+        });
+      }
+
+      // Show dua category
+      function showDuaCategory(category) {
+        // Reset all tabs
+        document
+          .getElementById("all-duas-tab")
+          .classList.remove("bg-blue-500", "text-white");
+        document
+          .getElementById("all-duas-tab")
+          .classList.add("bg-gray-200", "text-gray-700");
+        document
+          .getElementById("favorite-duas-tab")
+          .classList.remove("bg-blue-500", "text-white");
+        document
+          .getElementById("favorite-duas-tab")
+          .classList.add("bg-gray-200", "text-gray-700");
+        document
+          .getElementById("custom-duas-tab")
+          .classList.remove("bg-blue-500", "text-white");
+        document
+          .getElementById("custom-duas-tab")
+          .classList.add("bg-gray-200", "text-gray-700");
+
+        // Hide all categories
+        document.getElementById("all-duas").classList.add("hidden");
+        document.getElementById("favorite-duas").classList.add("hidden");
+        document.getElementById("custom-duas").classList.add("hidden");
+
+        // Activate selected tab and show category
+        if (category === "all") {
+          document
+            .getElementById("all-duas-tab")
+            .classList.remove("bg-gray-200", "text-gray-700");
+          document
+            .getElementById("all-duas-tab")
+            .classList.add("bg-blue-500", "text-white");
+          document.getElementById("all-duas").classList.remove("hidden");
+        } else if (category === "favorites") {
+          document
+            .getElementById("favorite-duas-tab")
+            .classList.remove("bg-gray-200", "text-gray-700");
+          document
+            .getElementById("favorite-duas-tab")
+            .classList.add("bg-blue-500", "text-white");
+          document.getElementById("favorite-duas").classList.remove("hidden");
+          loadFavoriteDuas();
+        } else if (category === "custom") {
+          document
+            .getElementById("custom-duas-tab")
+            .classList.remove("bg-gray-200", "text-gray-700");
+          document
+            .getElementById("custom-duas-tab")
+            .classList.add("bg-blue-500", "text-white");
+          document.getElementById("custom-duas").classList.remove("hidden");
+          loadCustomDuasList();
+        }
+      }
+
+      // Load favorite duas
+      function loadFavoriteDuas() {
+        const container = document.getElementById("favorite-duas");
+        container.innerHTML = "";
+
+        const favoriteDuas = duas.filter((dua) => dua.isFavorite);
+
+        if (favoriteDuas.length === 0) {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "text-center py-8 text-gray-500";
+          emptyMessage.innerHTML =
+            '<i class="fas fa-heart text-3xl mb-2 text-gray-300"></i><p>No favorite duas yet</p>';
+          container.appendChild(emptyMessage);
+          return;
+        }
+
+        favoriteDuas.forEach((dua) => {
+          const duaButton = document.createElement("button");
+          duaButton.className =
+            "w-full p-4 rounded-lg shadow-sm text-left dua-button flex justify-between items-center bg-cover bg-center relative overflow-hidden";
+          duaButton.onclick = () => showDuaDetail(dua.id);
+
+          // Set background image
+          if (dua.image) {
+            duaButton.style.backgroundImage = `url('${dua.image}')`;
+          } else {
+            duaButton.classList.add("bg-white"); // fallback background if no image
+          }
+
+          // Optional: add a dark overlay to improve text readability
+          const overlay = document.createElement("div");
+          overlay.className = "absolute inset-0 bg-black bg-opacity-40";
+          duaButton.appendChild(overlay);
+
+          // Text content (on top of image)
+          const contentWrapper = document.createElement("div");
+          contentWrapper.className =
+            "relative z-10 flex justify-between w-full items-center";
+
+          const duaTitle = document.createElement("span");
+          duaTitle.className = "font-semibold text-white";
+          duaTitle.textContent = dua.title;
+
+          const icon = document.createElement("i");
+          icon.className = "fas fa-chevron-right text-white";
+
+          contentWrapper.appendChild(duaTitle);
+          contentWrapper.appendChild(icon);
+          duaButton.appendChild(contentWrapper);
+          container.appendChild(duaButton);
+        });
+      }
+
+      // Load custom duas list
+      function loadCustomDuasList() {
+        const container = document.getElementById("custom-duas-list");
+        container.innerHTML = "";
+
+        if (customDuas.length === 0) {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "text-center py-8 text-gray-500";
+          emptyMessage.innerHTML =
+            '<i class="fas fa-edit text-3xl mb-2 text-gray-300"></i><p>No custom duas yet</p>';
+          container.appendChild(emptyMessage);
+          return;
+        }
+
+        customDuas.forEach((dua, index) => {
+          const duaButton = document.createElement("button");
+          duaButton.className =
+            "w-full p-4 bg-white rounded-lg shadow-sm text-left dua-button flex justify-between items-center mt-3";
+          duaButton.onclick = () => showCustomDuaDetail(index);
+
+          const duaTitle = document.createElement("span");
+          duaTitle.className = "font-medium text-gray-800";
+          duaTitle.textContent = dua.title;
+
+          const icon = document.createElement("i");
+          icon.className = "fas fa-chevron-right text-gray-400";
+
+          duaButton.appendChild(duaTitle);
+          duaButton.appendChild(icon);
+          container.appendChild(duaButton);
+        });
+      }
+
+      // Show dua detail
+      function showDuaDetail(duaId) {
+        const dua = duas.find((d) => d.id === duaId);
+        if (!dua) return;
+
+        document.getElementById("dua-modal-title").textContent = dua.title;
+        document.getElementById("dua-modal-content").textContent = dua.content;
+        document.getElementById(
+          "dua-modal-reference"
+        ).textContent = `Reference: ${dua.reference}`;
+
+        const favoriteBtn = document.getElementById("dua-favorite-btn");
+        if (dua.isFavorite) {
+          favoriteBtn.innerHTML =
+            '<i class="fas fa-heart mr-2 text-red-500"></i> Remove Favorite';
+          favoriteBtn.classList.remove("bg-gray-200");
+          favoriteBtn.classList.add("bg-red-100", "text-red-700");
+        } else {
+          favoriteBtn.innerHTML = '<i class="far fa-heart mr-2"></i> Favorite';
+          favoriteBtn.classList.remove("bg-red-100", "text-red-700");
+          favoriteBtn.classList.add("bg-gray-200", "text-gray-700");
+        }
+
+        // Store current dua ID in the button for toggleFavoriteDua function
+        favoriteBtn.setAttribute("data-dua-id", duaId);
+
+        showModal("dua-detail-modal");
+      }
+
+      // Show custom dua detail
+      function showCustomDuaDetail(duaIndex) {
+        const dua = customDuas[duaIndex];
+        if (!dua) return;
+
+        document.getElementById("dua-modal-title").textContent = dua.title;
+        document.getElementById("dua-modal-content").textContent = dua.content;
+        document.getElementById("dua-modal-reference").textContent =
+          "My Personal Dua";
+
+        const favoriteBtn = document.getElementById("dua-favorite-btn");
+        favoriteBtn.classList.add("hidden");
+
+        showModal("dua-detail-modal");
+      }
+
+      // Toggle favorite dua
+      function toggleFavoriteDua() {
+        const favoriteBtn = document.getElementById("dua-favorite-btn");
+        const duaId = parseInt(favoriteBtn.getAttribute("data-dua-id"));
+        const duaIndex = duas.findIndex((d) => d.id === duaId);
+
+        if (duaIndex !== -1) {
+          duas[duaIndex].isFavorite = !duas[duaIndex].isFavorite;
+
+          if (duas[duaIndex].isFavorite) {
+            favoriteBtn.innerHTML =
+              '<i class="fas fa-heart mr-2 text-red-500"></i> Remove Favorite';
+            favoriteBtn.classList.remove("bg-gray-200");
+            favoriteBtn.classList.add("bg-red-100", "text-red-700");
+          } else {
+            favoriteBtn.innerHTML =
+              '<i class="far fa-heart mr-2"></i> Favorite';
+            favoriteBtn.classList.remove("bg-red-100", "text-red-700");
+            favoriteBtn.classList.add("bg-gray-200", "text-gray-700");
+          }
+
+          // Update favorite duas list if it's visible
+          if (
+            !document
+              .getElementById("favorite-duas")
+              .classList.contains("hidden")
+          ) {
+            loadFavoriteDuas();
+          }
+        }
+      }
+
+      // Show add dua modal
+      function showAddDuaModal() {
+        document.getElementById("new-dua-title").value = "";
+        document.getElementById("new-dua-content").value = "";
+        showModal("add-dua-modal");
+      }
+
+      // Save custom dua
+      function saveCustomDua() {
+        const title = document.getElementById("new-dua-title").value.trim();
+        const content = document.getElementById("new-dua-content").value.trim();
+
+        if (!title || !content) {
+          alert("Please fill in both title and content");
+          return;
+        }
+
+        const newDua = {
+          id: Date.now(), // Use timestamp as ID
+          title: title,
+          content: content,
+        };
+
+        customDuas.push(newDua);
+        saveCustomDuasToStorage();
+        loadCustomDuasList();
+        closeModal("add-dua-modal");
+      }
+
+      // Save custom duas to localStorage
+      function saveCustomDuasToStorage() {
+        localStorage.setItem("customDuas", JSON.stringify(customDuas));
+      }
+
+      // Load custom duas from localStorage
+      function loadCustomDuas() {
+        const savedDuas = localStorage.getItem("customDuas");
+        if (savedDuas) {
+          customDuas = JSON.parse(savedDuas);
+        }
+      }
+
+      // Tasbih counter functions
+      function incrementCounter() {
+        counter++;
+        updateCounterDisplay();
+      }
+
+      function resetCounter() {
+        if (counter > 0) {
+          // Save to history before resetting
+          saveTasbihHistory();
+          counter = 0;
+          updateCounterDisplay();
+        }
+      }
+
+      function setDhikr(dhikr) {
+        currentDhikr = dhikr;
+        document.getElementById("current-dhikr").textContent = dhikr;
+      }
+
+      function updateCounterDisplay() {
+        document.getElementById("counter-display").textContent = counter;
+      }
+
+      // Save tasbih history
+      function saveTasbihHistory() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+
+        tasbihHistory.unshift({
+          date: dateStr,
+          dhikr: currentDhikr,
+          count: counter,
+        });
+
+        // Keep only last 10 items
+        if (tasbihHistory.length > 10) {
+          tasbihHistory.pop();
+        }
+
+        // Update history display
+        loadTasbihHistory();
+      }
+
+      // Load tasbih history
+      function loadTasbihHistory() {
+        const container = document.getElementById("tasbih-history");
+        container.innerHTML = "";
+
+        if (tasbihHistory.length === 0) {
+          const emptyMessage = document.createElement("p");
+          emptyMessage.className = "text-center text-gray-500 py-4";
+          emptyMessage.textContent = "No history yet";
+          container.appendChild(emptyMessage);
+          return;
+        }
+
+        tasbihHistory.forEach((item) => {
+          const historyItem = document.createElement("div");
+          historyItem.className =
+            "flex justify-between items-center py-3 border-b border-gray-100";
+
+          const dateDhikr = document.createElement("div");
+          dateDhikr.className = "flex items-center";
+
+          const date = document.createElement("span");
+          date.className = "font-medium text-gray-700 mr-2";
+          date.textContent = item.date;
+
+          const dhikr = document.createElement("span");
+          dhikr.className =
+            "text-sm bg-gray-100 px-2 py-1 rounded-full text-gray-600";
+          dhikr.textContent = item.dhikr;
+
+          dateDhikr.appendChild(date);
+          dateDhikr.appendChild(dhikr);
+
+          const count = document.createElement("span");
+          count.className = "font-bold text-gray-800";
+          count.textContent = item.count;
+
+          historyItem.appendChild(dateDhikr);
+          historyItem.appendChild(count);
+          container.appendChild(historyItem);
+        });
+      }
+
+      // Profile functions
+      function loadUserProfile() {
+        document.getElementById("profile-name").textContent = userData.name;
+        document.getElementById("member-since").textContent =
+          userData.memberSince;
+        document.getElementById("profile-name-input").value = userData.name;
+        document.getElementById("profile-email-input").value = userData.email;
+
+        // Set location dropdowns
+        document.getElementById("country-select").value =
+          userData.location.country;
+        document.getElementById("city-input").value = userData.location.city;
+        document.getElementById("method-select").value =
+          userData.location.method;
+
+        // Set notification toggles
+        document.getElementById("prayer-notifications-toggle").checked =
+          userData.notifications.prayer;
+        document.getElementById("reminder-notifications-toggle").checked =
+          userData.notifications.reminder;
+        document.getElementById("friday-notifications-toggle").checked =
+          userData.notifications.friday;
+
+        // Set dark mode and language
+        document.getElementById("dark-mode-toggle").checked = userData.darkMode;
+        document.getElementById("language-select").value = userData.language;
+      }
+
+      function showEditProfileModal() {
+        showModal("edit-profile-modal");
+      }
+
+      function saveProfile() {
+        const name = document.getElementById("profile-name-input").value.trim();
+        const email = document
+          .getElementById("profile-email-input")
+          .value.trim();
+
+        if (!name) {
+          alert("Please enter your name");
+          return;
+        }
+
+        userData.name = name;
+        userData.email = email;
+
+        document.getElementById("profile-name").textContent = name;
+        closeModal("edit-profile-modal");
+      }
+
+      // Location settings
+      function showLocationSettings() {
+        showModal("location-settings-modal");
+      }
+
+      function saveLocationSettings() {
+        const country = document.getElementById("country-select").value;
+        const city = document.getElementById("city-input").value.trim();
+        const method = document.getElementById("method-select").value;
+
+        if (!country || !city) {
+          alert("Please select country and enter city");
+          return;
+        }
+
+        userData.location = {
+          country: country,
+          city: city,
+          method: method,
+        };
+
+        // Update prayer location display
+        document.getElementById(
+          "prayer-location"
+        ).textContent = `${city}, ${getCountryName(country)}`;
+
+        // Reload prayer times (in a real app, this would fetch new times from API)
+        loadPrayerTimes();
+        loadDetailedPrayerTimes();
+
+        closeModal("location-settings-modal");
+      }
+
+      // Get country name from code
+      function getCountryName(code) {
+        const countries = {
+          US: "United States",
+          GB: "United Kingdom",
+          SA: "Saudi Arabia",
+          AE: "UAE",
+          PK: "Pakistan",
+          IN: "India",
+          MY: "Malaysia",
+          ID: "Indonesia",
+        };
+        return countries[code] || code;
+      }
+
+      // Notification settings
+      function showNotificationSettings() {
+        showModal("notification-settings-modal");
+      }
+
+      function saveNotificationSettings() {
+        userData.notifications = {
+          prayer: document.getElementById("prayer-notifications-toggle")
+            .checked,
+          reminder: document.getElementById("reminder-notifications-toggle")
+            .checked,
+          friday: document.getElementById("friday-notifications-toggle")
+            .checked,
+        };
+
+        closeModal("notification-settings-modal");
+      }
+
+      // About app
+      function showAboutApp() {
+        showModal("about-app-modal");
+      }
+
+      // Logout
+      function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+          alert("Logged out successfully");
+          // In a real app, this would redirect to login page
+        }
+      }
+
+      // Load user preferences from localStorage
+      function loadUserPreferences() {
+        const savedUserData = localStorage.getItem("userData");
+        if (savedUserData) {
+          userData = JSON.parse(savedUserData);
+          loadUserProfile();
+        }
+
+        // Apply dark mode if enabled
+        if (userData.darkMode) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      }
+
+      // Save user preferences to localStorage
+      function saveUserPreferences() {
+        localStorage.setItem("userData", JSON.stringify(userData));
+      }
+
+      // Modal functions
+      function showModal(modalId) {
+        document.getElementById(modalId).classList.remove("hidden");
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).classList.add("hidden");
+      }
+
+      // Event listeners for preferences
+      document
+        .getElementById("dark-mode-toggle")
+        .addEventListener("change", function () {
+          userData.darkMode = this.checked;
+          if (this.checked) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+          saveUserPreferences();
+        });
+
+      document
+        .getElementById("language-select")
+        .addEventListener("change", function () {
+          userData.language = this.value;
+          saveUserPreferences();
+          // In a real app, this would reload the page with new language
+          alert("Language changed. App will reload with new language.");
+        });
+
+      // Dua search functionality
+      document
+        .getElementById("dua-search")
+        .addEventListener("input", function () {
+          const searchTerm = this.value.toLowerCase();
+          const activeCategory = document.querySelector(
+            '[id$="-duas"]:not(.hidden)'
+          ).id;
+
+          if (activeCategory === "all-duas") {
+            searchAllDuas(searchTerm);
+          } else if (activeCategory === "favorite-duas") {
+            searchFavoriteDuas(searchTerm);
+          } else if (activeCategory === "custom-duas") {
+            searchCustomDuas(searchTerm);
+          }
+        });
+
+      function searchAllDuas(searchTerm) {
+        const container = document.getElementById("all-duas");
+        container.innerHTML = "";
+
+        const filteredDuas = duas.filter(
+          (dua) =>
+            dua.title.toLowerCase().includes(searchTerm) ||
+            dua.content.toLowerCase().includes(searchTerm)
+        );
+
+        if (filteredDuas.length === 0) {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "text-center py-8 text-gray-500";
+          emptyMessage.innerHTML =
+            '<i class="fas fa-search text-3xl mb-2 text-gray-300"></i><p>No duas found</p>';
+          container.appendChild(emptyMessage);
+          return;
+        }
+
+        filteredDuas.forEach((dua) => {
+          const duaButton = document.createElement("button");
+          duaButton.className =
+            "w-full p-4 rounded-lg shadow-sm text-left dua-button flex justify-between items-center bg-cover bg-center relative overflow-hidden";
+          duaButton.onclick = () => showDuaDetail(dua.id);
+
+          // Set background image
+          if (dua.image) {
+            duaButton.style.backgroundImage = `url('${dua.image}')`;
+          } else {
+            duaButton.classList.add("bg-white"); // fallback background if no image
+          }
+
+          // Optional: add a dark overlay to improve text readability
+          const overlay = document.createElement("div");
+          overlay.className = "absolute inset-0 bg-black bg-opacity-40";
+          duaButton.appendChild(overlay);
+
+          // Text content (on top of image)
+          const contentWrapper = document.createElement("div");
+          contentWrapper.className =
+            "relative z-10 flex justify-between w-full items-center";
+
+          const duaTitle = document.createElement("span");
+          duaTitle.className = "font-semibold text-white";
+          duaTitle.textContent = dua.title;
+
+          const icon = document.createElement("i");
+          icon.className = "fas fa-chevron-right text-white";
+
+          contentWrapper.appendChild(duaTitle);
+          contentWrapper.appendChild(icon);
+          duaButton.appendChild(contentWrapper);
+          container.appendChild(duaButton);
+        });
+      }
+
+      function searchFavoriteDuas(searchTerm) {
+        const container = document.getElementById("favorite-duas");
+        container.innerHTML = "";
+
+        const filteredDuas = duas.filter(
+          (dua) =>
+            dua.isFavorite &&
+            (dua.title.toLowerCase().includes(searchTerm) ||
+              dua.content.toLowerCase().includes(searchTerm))
+        );
+
+        if (filteredDuas.length === 0) {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "text-center py-8 text-gray-500";
+          emptyMessage.innerHTML =
+            '<i class="fas fa-search text-3xl mb-2 text-gray-300"></i><p>No favorite duas found</p>';
+          container.appendChild(emptyMessage);
+          return;
+        }
+
+        filteredDuas.forEach((dua) => {
+          const duaButton = document.createElement("button");
+          duaButton.className =
+            "w-full p-4 bg-white rounded-lg shadow-sm text-left dua-button flex justify-between items-center";
+          duaButton.onclick = () => showDuaDetail(dua.id);
+
+          const duaTitle = document.createElement("span");
+          duaTitle.className = "font-medium text-gray-800";
+          duaTitle.textContent = dua.title;
+
+          const icon = document.createElement("i");
+          icon.className = "fas fa-chevron-right text-gray-400";
+
+          duaButton.appendChild(duaTitle);
+          duaButton.appendChild(icon);
+          container.appendChild(duaButton);
+        });
+      }
+
+      function searchCustomDuas(searchTerm) {
+        const container = document.getElementById("custom-duas-list");
+        container.innerHTML = "";
+
+        const filteredDuas = customDuas.filter(
+          (dua) =>
+            dua.title.toLowerCase().includes(searchTerm) ||
+            dua.content.toLowerCase().includes(searchTerm)
+        );
+
+        if (filteredDuas.length === 0) {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "text-center py-8 text-gray-500";
+          emptyMessage.innerHTML =
+            '<i class="fas fa-search text-3xl mb-2 text-gray-300"></i><p>No custom duas found</p>';
+          container.appendChild(emptyMessage);
+          return;
+        }
+
+        filteredDuas.forEach((dua, index) => {
+          const duaButton = document.createElement("button");
+          duaButton.className =
+            "w-full p-4 bg-white rounded-lg shadow-sm text-left dua-button flex justify-between items-center mt-3";
+          duaButton.onclick = () => showCustomDuaDetail(index);
+
+          const duaTitle = document.createElement("span");
+          duaTitle.className = "font-medium text-gray-800";
+          duaTitle.textContent = dua.title;
+
+          const icon = document.createElement("i");
+          icon.className = "fas fa-chevron-right text-gray-400";
+
+          duaButton.appendChild(duaTitle);
+          duaButton.appendChild(icon);
+          container.appendChild(duaButton);
+        });
+      }
     </script>
-</body>
+  </body>
 </html>
